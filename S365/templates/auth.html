@@ -1,0 +1,202 @@
+<html>
+    <head>
+        <title>Authentication</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> <!-- jQuery -->
+    </head>
+    <body>
+        <form id="signup2">
+            
+        </form>
+
+
+        <form id="auth">{% csrf_token %}
+
+            <lable for="email">Enter your email:</lable><br>
+            <input id="email" type="email" name="email" placeholder="Email address" />
+            <button type="submit">Submit</button>
+        </form>
+
+        <form id="login">
+            
+        </form>
+
+        <form id="otp-form">
+            
+        </form>
+
+    </body>
+    <script>
+        function get(name){
+   if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+      return decodeURIComponent(name[1]);
+}
+    </script>
+    <script>
+
+$(document).ready(function () {
+  $("#auth").submit(function (event) {
+    var ukey = get('ukey');
+    var email = $('#email').val();
+    $.ajax({
+      type: "POST",
+
+      url: "{% url 'check' %}"+"?ukey="+ukey,
+      data: {
+        'email':$('#email').val(),
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+      success: function (res) {
+        if(res.status==1){
+            $('#login').html("<lable for='email'>Enter your email:</lable><br><input id='email' type='email' name='email' value='"+email+"' readonly /><br>");
+            $('#login').append("<lable for='password'>Enter your password:</lable><br><input id='password' type='password' name='password1' placeholder='Password' /><br>");
+            $('#login').append("<div id='message'></div>");
+
+            //add button
+            $('#login').append("<button type='submit' >Login</button>");
+            $('#auth').html('');
+
+        }
+        else if(res.status==0){
+            //add name and create password field
+            $('#signup2').html("<div id='message'></div>");
+            $('#signup2').append("<lable for='name'>Enter your name:</lable><br><input id='name' type='text' name='name' placeholder='Name' /><br>");
+            $('#signup2').append("<lable for='email'>Enter your email:</lable><br><input id='email' type='email' name='email' value='"+email+"' readonly /><br>");
+            $('#signup2').append("<lable for='password'>Enter your password:</lable><br><input id='password1' type='password' name='password1' placeholder='Password' /><br>");
+            $('#signup2').append("<lable for='password'>Confirm your password:</lable><br><input id='password2' type='password' name='password2' placeholder='Password' /><br>");
+            $('#signup2').append("<div id='message'></div>");
+
+            //add button
+            $('#signup2').append("<button type='submit'>Sign up</button>");
+            $('#auth').html('');
+            
+        }
+      }
+    });
+    return false; //<---- move it here
+  });
+
+});
+    </script>
+
+<script>
+
+$(document).ready(function () {
+  $("#signup2").submit(function (event) {
+    var ukey = get('ukey');
+    $.ajax({
+      type: "POST",
+
+      url: "{% url 'auth' %}?ukey="+ukey,
+      data: {
+        'name':$('#name').val(),
+        'email':$('#email').val(),
+        'password1':$('#password1').val(),
+        'password2':$('#password2').val(),
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+      success: function (res) {
+        if(res.status==1){
+            window.location.href=res.location;
+        }
+        else if(res.status==0){
+            $('#message').html("<p style='color:red'>Something went wrong!</p>");
+        }
+        else if(res.status == 4){
+            $('#message').html("<p style='color:red'>"+res.error+"</p>");
+        }
+      }
+    });
+    return false; //<---- move it here
+  });
+
+});
+    
+</script>
+
+
+<script>
+    $(document).ready(function () {
+      $("#login").submit(function (event) {
+        var ukey = get('ukey');
+        $.ajax({
+          type: "POST",
+    
+          url: "{% url 'auth' %}?ukey="+ukey,
+          data: {
+            'email':$('#email').val(),
+            'password':$('#password').val(),
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (res) {
+            if(res.status==1){
+                window.location.href=res.location;
+    
+            }
+            else if(res.status==0){
+    
+            //add incorrect password message
+            $('#message').html("<p style='color:red'>Incorrect Credentials</p>");
+            
+    
+            }
+            else if(res.status==4){
+    
+                //add incorrect password message
+                $('#message').html("<p style='color:red'>Both password are not matching, try again!</p>");
+                
+
+                }
+        else if(res.status==8){
+            $('#message').append("<div id='message'></div>");
+        }
+        else if(res.status==5 || res.status==6){
+            $('#otp-form').html("<p>"+res.error+"</p>");
+            $('#otp-form').append('<lable for="otp">Enter your OTP:</lable><br><input id="otp" type="text" name="otp" placeholder="OTP" /><br>');
+            $('#otp-form').append("<button type='submit'>Verify OTP</button>");
+            $('#login').html('');
+
+        }
+          }
+        });
+        return false; //<---- move it here
+      });
+    
+    });
+        
+</script>
+
+
+<script>
+    $(document).ready(function () {
+      $("#otp-form").submit(function (event) {
+        var ukey = get('ukey');
+        $.ajax({
+          type: "POST",
+    
+          url: "{% url 'auth' %}?ukey="+ukey,
+          data: {
+            'otp':$('#otp').val(),
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+            
+          },
+          success: function (res) {
+            if(res.status==6){
+                window.location.href=res.location;
+    
+            }
+            else if(res.status==7){
+    
+            
+            }
+
+
+          }
+        });
+        return false; //<---- move it here
+      });
+    
+    });
+        
+</script>
+
+</html>

@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title>
+            TechBlog
+        </title>
+        <body>
+            <marquee behavior="alternate" direction="right" scrollamount="5" scrolldelay="5">
+                <h1>
+                    Welcome to TechBlog
+                </h1>
+            </marquee>
+            {% if name %}
+            <center>
+                <h1>
+                    Hola {{ name }}!
+                </h1>
+                <h3>
+                    Email: {{ email }}
+                    <br>
+                    <a href="{% url 'logout' %}">Logout</a>
+                </h3>
+            </center>
+            {% else %}
+            <center>
+                <h4>In order to use Tech-blog, you must be authenticated user, We are using S365 as identity provider.</h4>
+                <h3><a href="{% url 'verify-me' %}">Verify yourself to view and post on Tech-Blog.</a></h3>
+            </center>
+            {% endif %}
+        </body>
+
+    </head>
+</html>
